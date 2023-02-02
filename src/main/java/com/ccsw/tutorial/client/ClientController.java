@@ -1,9 +1,7 @@
 package com.ccsw.tutorial.client;
 
-import com.ccsw.tutorial.client.model.ClientDto;
-import com.ccsw.tutorial.exception.ExistsException;
-import com.devonfw.module.beanmapping.common.api.BeanMapper;
 import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -13,6 +11,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
+
+import com.ccsw.tutorial.client.model.ClientDto;
+import com.ccsw.tutorial.exception.ExistsException;
+import com.devonfw.module.beanmapping.common.api.BeanMapper;
 
 @RequestMapping(value = "/clients")
 @RestController
@@ -41,7 +43,7 @@ public class ClientController {
     try {
       this.clientService.save(id, clientDto);
     } catch (ExistsException ex) {
-      throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, ex.getMessage());
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
   }
 
