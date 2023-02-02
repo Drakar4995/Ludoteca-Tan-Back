@@ -7,10 +7,11 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.ccsw.tutorial.category.model.Category;
+import com.ccsw.tutorial.category.model.CategoryDto;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -18,96 +19,88 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.ccsw.tutorial.category.model.Category;
-import com.ccsw.tutorial.category.model.CategoryDto;
-
 @ExtendWith(MockitoExtension.class)
 public class CategoryTest {
+  @Mock
+  private CategoryRepository categoryRepository;
 
-    @Mock
-    private CategoryRepository categoryRepository;
+  @InjectMocks
+  private CategoryServiceImpl categoryService;
 
-    @InjectMocks
-    private CategoryServiceImpl categoryService;
+  @Test
+  public void findAllShouldReturnAllCategories() {
+    List<Category> list = new ArrayList<>();
+    list.add(mock(Category.class));
 
-    @Test
-    public void findAllShouldReturnAllCategories() {
+    when(categoryRepository.findAll()).thenReturn(list);
 
-        List<Category> list = new ArrayList<>();
-        list.add(mock(Category.class));
+    List<Category> categories = categoryService.findAll();
 
-        when(categoryRepository.findAll()).thenReturn(list);
+    assertNotNull(categories);
+    assertEquals(1, categories.size());
+  }
 
-        List<Category> categories = categoryService.findAll();
+  public static final String CATEGORY_NAME = "CAT1";
 
-        assertNotNull(categories);
-        assertEquals(1, categories.size());
-    }
+  @Test
+  public void saveNotExistsCategoryIdShouldInsert() {
+    CategoryDto categoryDto = new CategoryDto();
+    categoryDto.setName(CATEGORY_NAME);
 
-    public static final String CATEGORY_NAME = "CAT1";
+    ArgumentCaptor<Category> category = ArgumentCaptor.forClass(Category.class);
 
-    @Test
-    public void saveNotExistsCategoryIdShouldInsert() {
+    categoryService.save(null, categoryDto);
 
-        CategoryDto categoryDto = new CategoryDto();
-        categoryDto.setName(CATEGORY_NAME);
+    verify(categoryRepository).save(category.capture());
 
-        ArgumentCaptor<Category> category = ArgumentCaptor.forClass(Category.class);
+    assertEquals(CATEGORY_NAME, category.getValue().getName());
+  }
 
-        categoryService.save(null, categoryDto);
+  public static final Long EXISTS_CATEGORY_ID = 1L;
 
-        verify(categoryRepository).save(category.capture());
+  @Test
+  public void saveExistsCategoryIdShouldUpdate() {
+    CategoryDto categoryDto = new CategoryDto();
+    categoryDto.setName(CATEGORY_NAME);
 
-        assertEquals(CATEGORY_NAME, category.getValue().getName());
-    }
+    Category category = mock(Category.class);
+    when(categoryRepository.findById(EXISTS_CATEGORY_ID))
+      .thenReturn(Optional.of(category));
 
-    public static final Long EXISTS_CATEGORY_ID = 1L;
+    categoryService.save(EXISTS_CATEGORY_ID, categoryDto);
 
-    @Test
-    public void saveExistsCategoryIdShouldUpdate() {
+    verify(categoryRepository).save(category);
+  }
 
-        CategoryDto categoryDto = new CategoryDto();
-        categoryDto.setName(CATEGORY_NAME);
+  @Test
+  public void deleteExistsCategoryIdShouldDelete() {
+    categoryService.delete(EXISTS_CATEGORY_ID);
 
-        Category category = mock(Category.class);
-        when(categoryRepository.findById(EXISTS_CATEGORY_ID)).thenReturn(Optional.of(category));
+    verify(categoryRepository).deleteById(EXISTS_CATEGORY_ID);
+  }
 
-        categoryService.save(EXISTS_CATEGORY_ID, categoryDto);
+  @Test
+  public void getExistsCategoryIdShouldReturnCategory() {
+    Category category = mock(Category.class);
+    when(category.getId()).thenReturn(EXISTS_CATEGORY_ID);
+    when(categoryRepository.findById(EXISTS_CATEGORY_ID))
+      .thenReturn(Optional.of(category));
 
-        verify(categoryRepository).save(category);
-    }
+    Category categoryResponse = categoryService.get(EXISTS_CATEGORY_ID);
 
-    @Test
-    public void deleteExistsCategoryIdShouldDelete() {
+    assertNotNull(categoryResponse);
+    assertEquals(EXISTS_CATEGORY_ID, category.getId());
+  }
 
-        categoryService.delete(EXISTS_CATEGORY_ID);
+  private static final Long NOT_EXISTS_CATEGORY_ID = 11111L;
 
-        verify(categoryRepository).deleteById(EXISTS_CATEGORY_ID);
-    }
+  @Test
+  public void getNotExistsCategoryIdShouldReturnNull() {
+    when(categoryRepository.findById(NOT_EXISTS_CATEGORY_ID))
+      .thenReturn(Optional.empty());
 
-    @Test
-    public void getExistsCategoryIdShouldReturnCategory() {
+    Category category = categoryService.get(NOT_EXISTS_CATEGORY_ID);
 
-        Category category = mock(Category.class);
-        when(category.getId()).thenReturn(EXISTS_CATEGORY_ID);
-        when(categoryRepository.findById(EXISTS_CATEGORY_ID)).thenReturn(Optional.of(category));
-
-        Category categoryResponse = categoryService.get(EXISTS_CATEGORY_ID);
-
-        assertNotNull(categoryResponse);
-        assertEquals(EXISTS_CATEGORY_ID, category.getId());
-    }
-
-    private static final Long NOT_EXISTS_CATEGORY_ID = 11111L;
-
-    @Test
-    public void getNotExistsCategoryIdShouldReturnNull() {
-
-          when(categoryRepository.findById(NOT_EXISTS_CATEGORY_ID)).thenReturn(Optional.empty());
-
-          Category category = categoryService.get(NOT_EXISTS_CATEGORY_ID);
-
-          assertNull(category);
-    }
-
+    assertNull(category);
+  }
 }
