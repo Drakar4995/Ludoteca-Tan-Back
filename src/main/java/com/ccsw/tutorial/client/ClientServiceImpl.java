@@ -1,11 +1,13 @@
 package com.ccsw.tutorial.client;
 
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.ccsw.tutorial.client.model.Client;
 import com.ccsw.tutorial.client.model.ClientDto;
 import com.ccsw.tutorial.exception.ExistsException;
-import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 @Service
 public class ClientServiceImpl implements ClientService {
@@ -26,7 +28,7 @@ public class ClientServiceImpl implements ClientService {
    * Podemos guardar o actualizar un cliente
    */
   @Override
-  public void save(Long id, ClientDto clientDto) throws ExistsException {
+  public void save(Long id, ClientDto clientDto) {
     Client client;
     boolean exists;
 
