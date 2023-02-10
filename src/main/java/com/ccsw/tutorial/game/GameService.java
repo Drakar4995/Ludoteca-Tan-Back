@@ -27,4 +27,5 @@ public interface GameService {
      */
     void save(Long id, GameDto dto);
 
+    Game get(Long id);
 }
